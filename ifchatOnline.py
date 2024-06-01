@@ -113,24 +113,25 @@ def main():
     pergunta = st.chat_input("Qual sua dúvida?")
 
     if pergunta:
-        gemini_model = Gemini_model()
-        chat = gemini_model.criar_modelo()
-        #Acessa o modelo e retorna uma resposta 
-        resposta = chat.send_message (pergunta)
+        with st.spinner('Pensando... por favor aguarde'):
+            gemini_model = Gemini_model()
+            chat = gemini_model.criar_modelo()
+            #Acessa o modelo e retorna uma resposta 
+            resposta = chat.send_message (pergunta)
 
-      # Display user message in chat message container
-        with st.chat_message("Você"):
-            st.markdown(pergunta)
-        # Add user message to chat history
-        st.session_state.messages.append({"role": "Você", "content": pergunta})
+        # Display user message in chat message container
+            with st.chat_message("Você"):
+                st.markdown(pergunta)
+            # Add user message to chat history
+            st.session_state.messages.append({"role": "Você", "content": pergunta})
 
-   
-        response = f"Echo: {resposta.text}"
-        # Display assistant response in chat message container
-        with st.chat_message("Assistente"):
-            st.markdown(response)
-        # Add assistant response to chat history
-        st.session_state.messages.append({"role": "Assistente", "content": response})
+    
+            response = f"Echo: {resposta.text}"
+            # Display assistant response in chat message container
+            with st.chat_message("Assistente"):
+                st.markdown(response)
+            # Add assistant response to chat history
+            st.session_state.messages.append({"role": "Assistente", "content": response})
     
 
 if __name__ == "__main__":

@@ -38,7 +38,7 @@ class Llama_model:
 
         # Carregando o modelo do Llama
         n_gpu_layers = -1
-        n_batch = 512
+        n_batch = 2048
         llm = LlamaCpp(
             model_path=os.path.join(os.getcwd(), "llama-2-7b-chat.Q4_K_M.gguf"),
             n_gpu_layers=n_gpu_layers,
@@ -121,24 +121,24 @@ def main():
     pergunta = st.chat_input("Qual sua dúvida?")
 
     if pergunta:
+        with st.spinner('Pensando... por favor aguarde'):
+            #Acessa o modelo e retorna uma resposta 
+            resposta = pergunta_usuario(pergunta)
 
-        #Acessa o modelo e retorna uma resposta 
-        resposta = pergunta_usuario(pergunta)
 
+            # Display user message in chat message container
+            with st.chat_message("Você"):
+                st.markdown(pergunta)
+            # Add user message to chat history
+            st.session_state.messages.append({"role": "Você", "content": pergunta})
 
-        # Display user message in chat message container
-        with st.chat_message("Você"):
-            st.markdown(pergunta)
-        # Add user message to chat history
-        st.session_state.messages.append({"role": "Você", "content": pergunta})
-
-   
-        response = f"Echo: {resposta}"
-        # Display assistant response in chat message container
-        with st.chat_message("Assistente"):
-            st.markdown(response)
-        # Add assistant response to chat history
-        st.session_state.messages.append({"role": "Assistente", "content": resposta})
+    
+            response = f"Echo: {resposta}"
+            # Display assistant response in chat message container
+            with st.chat_message("Assistente"):
+                st.markdown(response)
+            # Add assistant response to chat history
+            st.session_state.messages.append({"role": "Assistente", "content": resposta})
 
 if __name__ == "__main__":
     main()

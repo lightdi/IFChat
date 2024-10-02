@@ -64,7 +64,7 @@ langchain-core==0.2.3
 langchain-text-splitters==0.2.0
 langchainhub==0.1.17
 langsmith==0.1.67
--e git+https://github.com/abetlen/llama-cpp-python.git@165b4dc6c188f8fda2fc616154e111f710484eba#egg=llama_cpp_python
+-e git+https://github.com/abetlen/llama-cpp-python.git@main#egg=llama_cpp_python
 markdown-it-py==3.0.0
 MarkupSafe==2.1.5
 marshmallow==3.21.2

@@ -1,6 +1,7 @@
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from telegram.telegram import router as telegram_router
+from rag.upload import router as upload_router
 import httpx 
 from core.config import TELEGRAM_TOKEN, WEBHOOK_URL, BASE_URL
 
@@ -31,6 +32,7 @@ app = FastAPI(title="IFChat - Assistente do IFSousa", lifespan=start_up)
 
 #Registrando Módulos
 app.include_router(telegram_router, prefix='/telegram', tags=["Telegram"])
+#app.include_router(upload_router, prefix='/upload', tags=["Upload"])
 
 
 

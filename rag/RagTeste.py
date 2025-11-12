@@ -1,15 +1,15 @@
+#from core.config import API_KEY
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_chroma import Chroma
-#from langchain_text_splitters import RecursiveCharacterTextSplitter
-#from langchain_community.document_loaders import PyMuPDFLoader
-#from langchain_core.prompts import ChatPromptTemplate
-#from langchain_core.runnables import RunnableMap, RunnablePassthrough
-#from langchain_core.output_parsers import StrOutputParser
-from core.config import API_KEY
+from langchain_community.document_loaders import RecursiveUrlLoader
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain.agents import create_agent
 from langchain.tools import tool
+import re
+from html import unescape
 
+API_KEY  = "AIzaSyDyI-EC9VxdPGCJDfs1Hls8kOFoCDHGpeU"
 #Iniciando a concexão com o Geminai
 llm = ChatGoogleGenerativeAI(
     model="gemini-2.5-flash",
@@ -17,7 +17,8 @@ llm = ChatGoogleGenerativeAI(
     api_key=API_KEY
 )
 
-#Iniciando os embeddings
+
+
 embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-mpnet-base-v2")
 
 #Iniciando o ChormaDB
@@ -26,6 +27,37 @@ vector_store = Chroma(
     embedding_function=embeddings,
     persist_directory="./chroma_data"
 )
+
+def criar_base_dados():
+    loader = RecursiveUrlLoader(
+        "https://sites.google.com/ifpb.edu.br/manualcoordenadorpatos/manual-do-coordenador",
+    )
+
+    docs = loader.load()
+
+    print( len(docs))
+    print(f"Total characters: {len(docs[0].page_content)}")
+
+    print(docs[0].metadata)
+
+    print(docs[1].metadata)
+
+
+    text_splitter = RecursiveCharacterTextSplitter(
+        chunk_size=1000,  # chunk size (characters)
+        chunk_overlap=200,  # chunk overlap (characters)
+        add_start_index=True,  # track index in original document
+    )
+    all_splits = text_splitter.split_documents(docs)
+
+    print(f"Split blog post into {len(all_splits)} sub-documents.")
+
+    document_ids = vector_store.add_documents(documents=all_splits)
+
+    print(document_ids[:3])
+    print("Finalização da base")
+
+#criar_base_dados()
 
 
 #Procurar respresentividade
@@ -56,14 +88,20 @@ prompt = (
 )
 agent = create_agent(llm, tools, system_prompt=prompt)
 
+query = (
+    "Como proceder com acompanhameto domiciliar?\n\n"
+    ""
+)
 
-def ask_rag(question: str):
-    result = agent.invoke({"messages": [{"role": "user", "content": question}]})
-    print(result["messages"])
-    #print("####################")
-    #print(result["messages"][3].content)
-    if len(result["messages"])>2:
-        return result["messages"][3].content
-    else:
-        return result["messages"][1].content
+#for event in agent.stream(
+#    {"messages": [{"role": "user", "content": query}]},
+#    stream_mode="values",
+#):
+#    event["messages"][-1].pretty_print()
 
+result = agent.invoke({"messages": [{"role": "user", "content": query}]})
+print(result["messages"])
+
+
+
+result["messages"][3].content

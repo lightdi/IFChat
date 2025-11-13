@@ -3,6 +3,9 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_chroma import Chroma
 from langchain_community.document_loaders import RecursiveUrlLoader
+#Bibliotecas para ler PDF
+from pathlib import Path
+from langchain_community.document_loaders import PyMuPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain.agents import create_agent
 from langchain.tools import tool
@@ -27,6 +30,35 @@ vector_store = Chroma(
     embedding_function=embeddings,
     persist_directory="./chroma_data"
 )
+
+
+def criar_base_documentos():
+
+    docs = []
+
+    for n in Path("./documentos").glob("*.pdf"):
+        try:
+            loader = PyMuPDFLoader(str(n))
+            docs.extend(loader.load())
+            print(f"Carregado com sucesso arquivo {n.name}")
+        except Exception as e:
+            print(f"Erro ao carregar arquivo {n.name}: {e}")
+
+    print(f"Total de documentos carregados: {len(docs)}")
+    text_splitter = RecursiveCharacterTextSplitter(
+        chunk_size=1000,  # chunk size (characters)
+        chunk_overlap=200,  # chunk overlap (characters)
+        add_start_index=True,  # track index in original document
+    )
+    all_splits = text_splitter.split_documents(docs)
+
+    print(f"Split blog post into {len(all_splits)} sub-documents.")
+
+    document_ids = vector_store.add_documents(documents=all_splits)
+
+    print(document_ids[:3])
+    print("Finalização da base")
+
 
 def criar_base_dados():
     loader = RecursiveUrlLoader(
@@ -99,9 +131,12 @@ query = (
 #):
 #    event["messages"][-1].pretty_print()
 
-result = agent.invoke({"messages": [{"role": "user", "content": query}]})
-print(result["messages"])
+#result = agent.invoke({"messages": [{"role": "user", "content": query}]})
+#print(result["messages"])
 
 
 
-result["messages"][3].content
+#result["messages"][3].content
+
+
+#criar_base_documentos()
